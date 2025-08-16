@@ -1,0 +1,35 @@
+name: eslint workflow
+
+on:
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+        with:
+          files: |
+            **/*.js
+            **/*.ts
+            **/*.jsx
+            **/*.tsx
+
+      - name: Run ESLint on changed files
+        if: steps.changed-files.outputs.all_changed_files != ''
+        run: npx eslint ${{ steps.changed-files.outputs.all_changed_files }} --max-warnings=0
